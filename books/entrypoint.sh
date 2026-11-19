@@ -9,7 +9,7 @@ ln -sfn /home/frappe/assets sites/assets
 printf 'frappe\nfrappe_books\n' > sites/apps.txt
 test -f sites/common_site_config.json || echo '{}' > sites/common_site_config.json
 chown frappe:frappe sites/apps.txt sites/common_site_config.json
-redis-server --bind 127.0.0.1 --port 6379 --dir /data/redis --appendonly yes --daemonize yes
+runuser -u frappe -- redis-server --bind 127.0.0.1 --port 6379 --dir /data/redis --appendonly yes --daemonize yes
 runuser -u frappe -- bench set-config -g redis_cache redis://127.0.0.1:6379
 runuser -u frappe -- bench set-config -g redis_queue redis://127.0.0.1:6379
 runuser -u frappe -- bench set-config -g redis_socketio redis://127.0.0.1:6379
