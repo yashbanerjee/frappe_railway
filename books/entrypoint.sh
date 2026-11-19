@@ -27,5 +27,6 @@ if [ -n "${RAILWAY_PUBLIC_DOMAIN:-}" ]; then
 fi
 runuser -u frappe -- bench --site books enable-scheduler
 sed -i "s/listen 8080;/listen ${PORT:-8080};/" /etc/nginx/sites-enabled/default
+sed -i 's/^user www-data;/user frappe;/' /etc/nginx/nginx.conf
 redis-cli shutdown
 exec supervisord -c /etc/supervisor/supervisord.conf
