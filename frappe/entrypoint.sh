@@ -37,6 +37,10 @@ runuser -u frappe -- bench set-config -g redis_socketio "$REDIS_URL"
 runuser -u frappe -- bench set-config -gp socketio_port 9000
 runuser -u frappe -- bench set-config -g chromium_path /usr/bin/chromium-headless-shell
 
+if [ -n "${UPGRADE_BACKUP_PREFIX:-}" ]; then
+  /usr/local/bin/upgrade-check
+fi
+
 if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
   runuser -u frappe -- bench new-site "$SITE_NAME" \
     --mariadb-user-host-login-scope='%' \
@@ -50,6 +54,10 @@ fi
 # install-app skips apps already on the site, so this is safe on every boot.
 if [ -s frappe_apps.txt ]; then
   runuser -u frappe -- bench --site "$SITE_NAME" install-app $(cat frappe_apps.txt)
+fi
+
+if [ -f "sites/$SITE_NAME/private/upgrade-rollback-state.json" ]; then
+  (cd sites && runuser -u frappe -- "$BENCH/env/bin/python" /usr/local/bin/preserve-accounting.py "$SITE_NAME" restore)
 fi
 
 runuser -u frappe -- bench --site "$SITE_NAME" clear-cache
